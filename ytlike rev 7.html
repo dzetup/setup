@@ -1,0 +1,1187 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" 
+      content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
+  <title>MyTube - Video Favorit</title>
+  <link rel="preconnect" href="https://www.youtube.com">
+  <link rel="preconnect" href="https://img.youtube.com">
+
+</head>
+  <style>
+    /* ========================================================================================= CSS  */
+    * {
+      box-sizing: border-box;
+    }
+    body, html {
+      margin: 0; padding: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      height: 100%;
+      background-color: #fafafa;
+      overflow: hidden;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 4px 19px;
+      background-color: #fff;
+      box-shadow: 0 1px 5px rgb(0 0 0 / 0.1);
+      position: flex;
+      top: 0;
+      z-index: 10;
+      flex-wrap: nowrap;
+      gap: 4px;
+    }
+    header .logo {
+      font-weight: 700;
+      font-size: 14px;
+      color: #e62117;
+      flex: 1 1 auto;
+      text-align: left;
+    }
+    header .user-section {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      justify-content: flex-end;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    #user-name {
+      font-weight: 600;
+      color: #e62117;
+      max-width: 140px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      font-size: 14px;
+    }
+    #user-pic {
+      width: 26px;
+      height: 26px;
+      border-radius: 50%;
+      display: none;
+      object-fit: cover;
+      flex-shrink: 0;
+    }
+    #signin-button {
+      padding: 8px 18px;
+      background-color: #e62117;
+      border: none;
+      border-radius: 20px;
+      color: white;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      flex-shrink: 0;
+    }
+    #signin-button:hover {
+      background-color: #b51714;
+    }
+
+
+    
+    /* ============================================= VIDEO SECTION fullscreen scroll satu per satu === */
+    #video-section {
+      display: none;
+      flex-direction: column;
+      height: calc(100vh - 86px);
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+      scroll-behavior: smooth;
+      -webkit-overflow-scrolling: touch;
+    }
+    #video-section.active {
+      display: flex;
+    }
+    .video-card {
+      scroll-snap-align: start;
+      height: 100vh;
+      background-color: black;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+      transition: all 0.3s ease;
+    }
+    .video-card.fullscreen {
+      position: fixed !important;
+      top: 0 !important;
+      left: 0 !important;
+      width: 100vw !important;
+      height: 100vh !important;
+      z-index: 9999 !important;
+      background: black !important;
+    }
+    .video-card.fullscreen iframe {
+      height: 100% !important;
+      max-height: 100% !important;
+      aspect-ratio: auto !important;
+    }
+    .video-card iframe {
+      width: 100%;
+      height: calc(100% - 72px);
+      border: none;
+      aspect-ratio: 16 / 9;
+      background-color: black;
+      max-height: calc(100vh - 72px);
+      transition: height 0.3s ease;
+    }
+    .video-info {
+      background-color: rgba(0, 0, 0, 0.75);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 0 0 12px 12px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      position: relative;
+      height: 72px;
+      box-sizing: border-box;
+    }
+
+    .video-thumbnail-container.disabled {
+  pointer-events: none;
+  opacity: 0.4;
+}
+
+    .channel-thumb {
+      width: 48px;
+      height: 48px;
+      border-radius: 50%;
+      object-fit: cover;
+      background-color: #ddd;
+      flex-shrink: 0;
+    }
+    .video-title {
+  white-space: normal; /* biarkan teks bisa wrap */
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2; /* maksimal 2 baris */
+  -webkit-box-orient: vertical;
+  line-height: 1.2em; /* sesuaikan jika perlu */
+  max-height: 2.4em; /* 2 baris x line-height */
+}
+
+    /* ================================================================================= SHORTS SECTION */
+    #shorts-section {
+      display: none;
+      flex-direction: column;
+      overflow-y: scroll;
+      scroll-snap-type: y mandatory;
+      scroll-behavior: smooth;
+      height: calc(100vh - 86px);
+      -webkit-overflow-scrolling: touch;
+    }
+    #shorts-section.active {
+      display: flex;
+    }
+    .short-card {
+      scroll-snap-align: start;
+      height: 100vh;
+      background: black;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      position: relative;
+    }
+    .short-card iframe {
+      width: 100%;
+      height: calc(100% - 98px);
+      border: none;
+      aspect-ratio: 9 / 16;
+      background: black;
+      max-height: calc(100vh - 72px);
+    }
+    .short-info {
+      background-color: rgba(0, 0, 0, 0.75);
+      color: white;
+      padding: 8px 12px;
+      border-radius: 0 0 12px 12px;
+      width: 100%;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      position: relative;
+      height: 72px;
+      box-sizing: border-box;
+      font-size: 16px;
+    }
+    footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background-color: #fff;
+      box-shadow: 0 -1px 5px rgb(0 0 0 / 0.1);
+      display: flex;
+      justify-content: space-around;
+      padding: 2px 0;
+      z-index: 10;
+      flex-wrap: wrap;
+      gap: 8px;
+      transition: opacity 0.3s ease, visibility 0.3s ease;
+    }
+    footer.hidden {
+      opacity: 0;
+      visibility: hidden;
+      pointer-events: none;
+    }
+    footer button {
+      background: none;
+      border: none;
+      font-size: 10px;
+      font-weight: 700;
+      cursor: pointer;
+      color: #555;
+      padding: 4px 12px;
+      flex: 1 1 45%;
+      max-width: 150px;
+      transition: color 0.3s ease;
+      border-bottom: 2px transparent;
+      opacity: 90;
+    }
+    footer button.active {
+      color: #e62117;
+      border-color: #e62117;
+    }
+    footer button:focus-visible {
+      outline: 2px solid #e62117;
+      outline-offset: 2px;
+    }
+
+    @media (min-width: 601px) {
+      header {
+        flex-wrap: nowrap;
+        padding: 10px 16px;
+      }
+      header .logo {
+        flex: 1 1 auto;
+        font-size: 14px;
+        margin-bottom: 0;
+        text-align: left;
+      }
+      header .user-section {
+        flex: 1 1 auto;
+        justify-content: flex-end;
+      }
+      #user-name {
+        max-width: 120px;
+        font-size: 14px;
+      }
+      #signin-button {
+        font-size: 14px;
+        padding: 8px 16px;
+      }
+      footer button {
+        flex: 1 1 auto;
+        max-width: none;
+      }
+    }
+    @media (max-width: 600px) {
+      header .logo {
+        font-size: 14px;
+      }
+      #user-name {
+        font-size: 13px;
+        max-width: 100px;
+      }
+      #signin-button {
+        font-size: 13px;
+        padding: 6px 12px;
+      }
+      footer button {
+        font-size: 12px;
+        max-width: 120px;
+      }
+      .video-info {
+        font-size: 12px;
+        padding: 6px 10px;
+      }
+      .channel-thumb {
+        width: 26px;
+        height: 26px;
+      }
+      .video-title {
+        font-size: 13px;
+      }
+      .short-info {
+        font-size: 12px;
+        padding: 6px 10px;
+      }
+
+/* ====================================================================================== Toggle Switch */
+.switch-theme {
+  display: flex;
+  align-items: center;
+  cursor: pointer;
+  font-size: 20px;
+  margin-right: 8px;
+}
+.switch-theme input {
+  display: none;
+}
+
+/* ================================================================================= Dark Theme Styles */
+body.dark {
+  background-color: #121212;
+  color: #eee;
+}
+body.dark header,
+body.dark footer {
+  background-color: #1f1f1f;
+  box-shadow: 0 1px 5px rgba(255, 255, 255, 0.1);
+}
+body.dark .video-info,
+body.dark .short-info {
+  background-color: rgba(255, 255, 255, 0.1);
+  color: white;
+}
+body.dark footer button {
+  color: #ccc;
+}
+body.dark footer button.active {
+  color: #ff4444;
+  border-color: #ff4444;
+
+
+@media screen and (orientation: landscape) {
+  .video-card.fullscreen, .short-card.fullscreen {
+    position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  width: 100vw !important;
+  height: 100vh !important;
+  z-index: 9999 !important;
+  background: black !important;
+  margin: 0 !important;
+  padding: 0 !important;
+  
+/* Hilangkan header/footer saat fullscreen */
+body:has(.fullscreen) header,
+body:has(.fullscreen) footer {
+  display: none !important;
+}
+
+  .video-card.fullscreen iframe, 
+  .short-card.fullscreen iframe {
+    width: 100% !important;
+    height: 100% !important;
+    max-height: 100% !important;
+  }
+  
+  .video-card.fullscreen .video-info,
+  .short-card.fullscreen .short-info {
+    display: none !important;
+  }
+}
+
+}
+
+    }
+
+
+#mini-player {
+  position: fixed;
+  top: 56px; /* sesuai tinggi header kamu */
+  left: 0;
+  width: 100%;
+  height: 200px;
+  background: black;
+  z-index: 99;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+}
+#mini-player iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
+
+
+  </style>
+<head>
+<body>
+  <!-------------------------------------------------------------------------------------------  HTML  -->
+   <header role="banner">
+   <div class="logo" aria-label="Logo MyTube">MyTube</div>
+    <div class="user-section" role="region" aria-label="Informasi pengguna dan tombol masuk">
+      <div id="user-name" aria-live="polite"></div>
+      <img id="user-pic" alt="Foto profil pengguna" />
+      <button id="signin-button" aria-haspopup="dialog">Masuk</button>
+      <label class="switch-theme">
+  <input type="checkbox" id="dark-mode-toggle" aria-label="Toggle Dark Mode">🌙
+</label>
+
+    </div>
+   
+  </header>
+
+<div id="sticky-player" style="display:none; position:fixed; top:48px; left:0; right:0; z-index:9999; background:black; width:100vw;">
+  <div id="sticky-inner" style="position:relative; width:100%; padding-top:56.25%;"><!-- aspect ratio 16:9 --></div>
+</div>
+
+  <main>
+    <section id="video-section" aria-label="Daftar video favorit" class="active"></section>
+    <section id="shorts-section" aria-label="Daftar shorts favorit"></section>
+  </main>
+
+  <footer role="navigation" aria-label="Navigasi halaman" class="hidden">
+    <button id="footer-btn-videos" class="active" aria-pressed="true">Home</button>
+    <button id="footer-btn-shorts" aria-pressed="false">Shorts</button>
+  </footer>
+
+  
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
+  <script src="https://apis.google.com/js/api.js"></script>
+  <script>
+
+
+    // ================================================================================= KONFIGURASI ====
+    const CONFIG = {
+      CLIENT_ID: '919149494595-39p5bh25nse6uqn5b5osla9k4nqi8c1s.apps.googleusercontent.com',
+      API_KEY: 'AIzaSyCpnZv4UX9qwVPFib0zHjC1naCzwDXcWbk',
+      SCOPES: 'https://www.googleapis.com/auth/youtube.readonly https://www.googleapis.com/auth/userinfo.profile',
+      YOUTUBE_API: 'https://www.googleapis.com/discovery/v1/apis/youtube/v3/rest'
+    };
+
+    // ========== STATE MANAGEMENT ==========
+    const AppState = {
+      accessToken: null,
+      tokenClient: null,
+      currentFullscreenCard: null,
+      darkMode: localStorage.getItem('theme') === 'dark'
+    };
+
+    let lastScrollTop = 0;
+const header = document.getElementById('main-header');
+
+window.addEventListener('scroll', function () {
+  const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+
+  if (currentScroll > lastScrollTop) {
+    // Scroll down → sembunyikan header
+    header.style.top = '-80px'; // atur sesuai tinggi header kamu
+  } else {
+    // Scroll up → tampilkan header
+    header.style.top = '0';
+  }
+
+  lastScrollTop = currentScroll <= 0 ? 0 : currentScroll; // untuk iOS bounce
+});
+    
+    // ========== DOM ELEMENTS ==========
+    const DOM = {
+      signinButton: document.getElementById('signin-button'),
+      userNameElem: document.getElementById('user-name'),
+      userPicElem: document.getElementById('user-pic'),
+      videoSection: document.getElementById('video-section'),
+      shortsSection: document.getElementById('shorts-section'),
+      btnVideos: document.getElementById('footer-btn-videos'),
+      btnShorts: document.getElementById('footer-btn-shorts'),
+      footer: document.querySelector('footer'),
+      darkToggle: document.getElementById('dark-mode-toggle')
+    };
+
+    // ========== INITIALIZATION ==========
+    function initializeApp() {
+      setupEventListeners();
+      initGoogleSignIn();
+      checkDarkModePreference();
+    }
+
+    function setupEventListeners() {
+      // Auth and navigation
+      DOM.signinButton.onclick = handleSignIn;
+      DOM.btnVideos.onclick = showVideosSection;
+      DOM.btnShorts.onclick = showShortsSection;
+      
+      // Dark mode toggle
+      DOM.darkToggle.addEventListener('change', toggleDarkMode);
+      
+      // Fullscreen handling
+      document.addEventListener('fullscreenchange', handleFullscreenChange);
+      window.addEventListener('resize', handleOrientationChange);
+      window.addEventListener('orientationchange', handleOrientationChange);
+    }
+
+    // ========== AUTHENTICATION ==========
+    function initGoogleSignIn() {
+      google.accounts.id.initialize({
+        client_id: CONFIG.CLIENT_ID,
+        callback: () => {}
+      });
+      gapi.load('client', initializeGapiClient);
+    }
+
+    function initializeGapiClient() {
+      gapi.client.init({
+        apiKey: CONFIG.API_KEY,
+        discoveryDocs: [CONFIG.YOUTUBE_API]
+      }).then(() => {
+        AppState.tokenClient = google.accounts.oauth2.initTokenClient({
+          client_id: CONFIG.CLIENT_ID,
+          scope: CONFIG.SCOPES,
+          callback: handleTokenResponse
+        });
+      });
+    }
+
+    function handleSignIn() {
+      if (AppState.tokenClient) {
+        AppState.tokenClient.requestAccessToken();
+      } else {
+        alert('Tunggu sebentar, persiapan login...');
+      }
+    }
+
+    async function handleTokenResponse(resp) {
+      if (resp.error) return alert('Login gagal: ' + resp.error);
+      
+      AppState.accessToken = resp.access_token;
+      gapi.client.setToken({ access_token: AppState.accessToken });
+      
+      await fetchUserProfile();
+      await fetchLikedVideos();
+      
+      DOM.signinButton.style.display = 'none';
+      updateFooterVisibility();
+    }
+
+    // ========== USER PROFILE ==========
+    async function fetchAllLikedVideos() {
+  let allItems = [];
+  let nextPageToken = null;
+  do {
+    const res = await gapi.client.youtube.videos.list({
+      part: 'snippet,contentDetails',
+      myRating: 'like',
+      maxResults: 50,
+      pageToken: nextPageToken
+    });
+    allItems = allItems.concat(res.result.items || []);
+    nextPageToken = res.result.nextPageToken;
+  } while (nextPageToken);
+  return allItems;
+}
+
+async function fetchUserProfile() {
+      try {
+        const res = await gapi.client.request({
+          path: 'https://www.googleapis.com/oauth2/v1/userinfo?alt=json'
+        });
+        const profile = res.result;
+        
+        DOM.userNameElem.textContent = profile.name || '';
+        DOM.userPicElem.src = profile.picture || '';
+        DOM.userPicElem.style.display = profile.picture ? 'block' : 'none';
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      }
+    }
+
+    // ========== VIDEO MANAGEMENT ==========
+    async function fetchLikedVideos() {
+      try {
+        const res = await gapi.client.youtube.videos.list({
+          part: 'snippet,contentDetails',
+          myRating: 'like',
+          maxResults: 50
+        });
+        
+        const items = res.result.items || [];
+        const { shorts, regulars } = categorizeVideos(items);
+        
+        const allChannelIds = [...new Set(items.map(i => i.snippet.channelId))];
+        const channelThumbs = await fetchChannelThumbnails(allChannelIds);
+        
+        renderVideos(enhanceVideoData(regulars, channelThumbs));
+        renderShorts(enhanceVideoData(shorts, channelThumbs));
+        setupLandscapeFullscreenController();
+      } catch (error) {
+        console.error('Error fetching liked videos:', error);
+        DOM.videoSection.textContent = 'Gagal memuat video. Silakan coba lagi.';
+      }
+    }
+
+    function categorizeVideos(items) {
+      const shorts = [], regulars = [];
+      
+      items.forEach(video => {
+        const dur = video.contentDetails.duration;
+        const seconds = parseDurationToSeconds(dur);
+        const isShort = seconds <= 60;
+        
+        isShort ? shorts.push(video) : regulars.push(video);
+      });
+      
+      return { shorts, regulars };
+    }
+
+    function enhanceVideoData(videos, channelThumbs) {
+      return videos.map(video => ({
+        id: video.id,
+        title: video.snippet.title,
+        channelThumb: channelThumbs[video.snippet.channelId] || '',
+        channelTitle: video.snippet.channelTitle,
+        durationSeconds: parseDurationToSeconds(video.contentDetails.duration)
+      }));
+    }
+
+    async function fetchChannelThumbnails(channelIds) {
+      if (!channelIds.length) return {};
+      
+      try {
+        const res = await gapi.client.youtube.channels.list({
+          part: 'snippet',
+          id: channelIds.join(',')
+        });
+        
+        const map = {};
+        (res.result.items || []).forEach(ch => {
+          map[ch.id] = ch.snippet.thumbnails.default.url;
+        });
+        return map;
+      } catch (error) {
+        console.error('Error fetching channel thumbnails:', error);
+        return {};
+      }
+    }
+
+    function parseDurationToSeconds(duration) {
+      const match = duration.match(/PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/);
+      if (!match) return 0;
+      const h = parseInt(match[1] || '0'), 
+            m = parseInt(match[2] || '0'), 
+            s = parseInt(match[3] || '0');
+      return h * 3600 + m * 60 + s;
+    }
+
+    // ========== RENDER FUNCTIONS ==========
+    
+function renderVideos(videos) {
+  DOM.videoSection.innerHTML = '';
+
+  if (videos.length === 0) {
+    DOM.videoSection.textContent = 'Tidak ada video yang disukai.';
+    return;
+  }
+
+  videos.forEach((video) => {
+    const card = createVideoCard(video);
+    DOM.videoSection.appendChild(card);
+  });
+
+  setupStrictAutoplayObserver(); // <- ini kunci autoplay tunggal!
+}
+
+
+// ========== Fungsi viewport/video paling atas ==========
+
+function setupStrictAutoplayObserver() {
+  const iframes = Array.from(document.querySelectorAll('#video-section iframe'));
+
+  function findTopMostIframe() {
+    let topMost = null;
+    let minTop = Infinity;
+
+    for (const iframe of iframes) {
+      if (!iframe.dataset.ready) continue;
+
+      const rect = iframe.getBoundingClientRect();
+      const top = rect.top;
+
+      // Hanya iframe paling atas yang posisinya di viewport atas (0–100px)
+      if (top >= 0 && top <= 100 && top < minTop) {
+        topMost = iframe;
+        minTop = top;
+      }
+    }
+
+    return topMost;
+  }
+
+  function updatePlayback() {
+    const current = findTopMostIframe();
+
+    for (const iframe of iframes) {
+      const win = iframe.contentWindow;
+      if (!win || !iframe.dataset.ready) continue;
+
+      if (iframe === current) {
+        win.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      } else {
+        win.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      }
+    }
+  }
+
+  // Dengarkan scroll baik di section maupun di window (penting untuk mobile!)
+  document.getElementById('video-section').addEventListener('scroll', updatePlayback, { passive: true });
+  window.addEventListener('scroll', updatePlayback, { passive: true });
+  window.addEventListener('resize', updatePlayback);
+
+  // Cek awal
+  updatePlayback();
+}
+
+
+function enableClickToScroll() {
+  const cards = document.querySelectorAll('#video-section .video-card');
+
+  cards.forEach(card => {
+    card.addEventListener('click', () => {
+       activateMiniPlayer(video);
+      card.scrollIntoView({
+        behavior: 'smooth',
+        block: 'start'
+      });
+    });
+  });
+}
+
+
+// ================================================================================= FUNGSI iframe )
+function createVideoIframe(video, autoplay) {
+  const iframe = document.createElement('iframe');
+  iframe.src = `https://www.youtube.com/embed/${video.id}?rel=0&modestbranding=1&playsinline=1&enablejsapi=1${autoplay ? '&autoplay=1' : ''}`;
+  iframe.loading = 'lazy';
+  iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+  iframe.allowFullscreen = true;
+  iframe.title = video.title;
+  iframe.dataset.ready = false;
+  
+  iframe.addEventListener('load', function () {
+  this.dataset.ready = true;
+
+    if (autoplay) {
+      this.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+    }
+  });
+  
+  return iframe;
+}
+
+// UPDATE FUNGSI YANG SUDAH ADA
+function createVideoCard(video, autoplay) {
+  const card = document.createElement('div');
+  card.className = 'video-card';
+  
+  const iframe = createVideoIframe(video, autoplay);
+  const info = document.createElement('div');
+  info.className = 'video-info';
+  info.innerHTML = `
+    <img class="channel-thumb" src="${video.channelThumb}" alt="${video.channelTitle} thumbnail">
+    <div class="video-title">${video.title}</div>
+  `;
+  
+card.addEventListener('click', () => {
+  activateStickyPlayer(video);
+});
+
+
+
+  card.appendChild(iframe);
+  card.appendChild(info);
+  
+  return card;
+}
+
+
+
+
+    function renderShorts(shorts) {
+  DOM.shortsSection.innerHTML = '';
+
+  if (shorts.length === 0) {
+    DOM.shortsSection.textContent = 'Tidak ada Shorts yang disukai.';
+    return;
+  }
+
+  shorts.forEach(short => {
+    const card = createShortCard(short);
+    DOM.shortsSection.appendChild(card);
+  });
+
+  setupStrictShortsAutoplayObserver(); // <--- tambahkan ini
+}
+
+
+    // ========== UI CONTROLS ==========
+    function showVideosSection() {
+      DOM.btnVideos.classList.add('active');
+      DOM.btnShorts.classList.remove('active');
+      DOM.videoSection.classList.add('active');
+      DOM.shortsSection.classList.remove('active');
+      DOM.btnVideos.setAttribute('aria-pressed', 'true');
+      DOM.btnShorts.setAttribute('aria-pressed', 'false');
+    }
+
+    function showShortsSection() {
+      DOM.btnShorts.classList.add('active');
+      DOM.btnVideos.classList.remove('active');
+      DOM.shortsSection.classList.add('active');
+      DOM.videoSection.classList.remove('active');
+      DOM.btnShorts.setAttribute('aria-pressed', 'true');
+      DOM.btnVideos.setAttribute('aria-pressed', 'false');
+    }
+
+    function updateFooterVisibility() {
+      if (DOM.signinButton.style.display === 'none') {
+        DOM.footer.classList.remove('hidden');
+      } else {
+        DOM.footer.classList.add('hidden');
+      }
+    }
+
+    
+// =================================================================== Fungsi Short AUTOPLAY & FULLSCREEN ==========
+
+
+    function setupStrictShortsAutoplayObserver() {
+  const iframes = Array.from(document.querySelectorAll('#shorts-section iframe'));
+
+  function findTopMostIframe() {
+    let topMost = null;
+    let minTop = Infinity;
+
+    for (const iframe of iframes) {
+      if (!iframe.dataset.ready) continue;
+
+      const rect = iframe.getBoundingClientRect();
+      const top = rect.top;
+
+      if (top >= 0 && top <= 100 && top < minTop) {
+        topMost = iframe;
+        minTop = top;
+      }
+    }
+
+    return topMost;
+  }
+
+  function updatePlayback() {
+    const current = findTopMostIframe();
+
+    for (const iframe of iframes) {
+      const win = iframe.contentWindow;
+      if (!win || !iframe.dataset.ready) continue;
+
+      if (iframe === current) {
+        win.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      } else {
+        win.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      }
+    }
+  }
+
+  document.getElementById('shorts-section').addEventListener('scroll', updatePlayback, { passive: true });
+  window.addEventListener('scroll', updatePlayback, { passive: true });
+  window.addEventListener('resize', updatePlayback);
+
+  updatePlayback(); // jalankan sekali langsung
+}
+
+
+    // ========== PERBAIKAN FUNGSI YANG SUDAH ADA ==========
+function setupLandscapeFullscreenController() {
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      const card = entry.target;
+      const iframe = card.querySelector('iframe');
+      if (!iframe || !iframe.dataset.ready) return;
+      
+      const win = iframe.contentWindow;
+      if (!win) return;
+
+      // Perubahan utama di sini:
+      if (isLandscape() && entry.intersectionRatio > 0.6) {
+        if (!card.classList.contains('fullscreen')) {
+          card.classList.add('fullscreen');
+          requestFullscreenSafe(card);
+          playIframeVideo(iframe);
+          AppState.currentFullscreenCard = card;
+        }
+      } else {
+        if (card.classList.contains('fullscreen')) {
+          card.classList.remove('fullscreen');
+          exitFullscreenSafe(card);
+          pauseIframeVideo(iframe);
+          AppState.currentFullscreenCard = null;
+        }
+      }
+    });
+  }, { threshold: [0, 0.6, 1] });
+
+  // Terapkan observer ke semua card
+  document.querySelectorAll('#video-section .video-card, #shorts-section .short-card').forEach(card => {
+    observer.observe(card);
+    card.addEventListener('click', handleVideoCardClick);
+  });
+
+  // Tambahkan event listener untuk orientation change
+  window.addEventListener('orientationchange', () => {
+    if (!isLandscape() && AppState.currentFullscreenCard) {
+      exitFullscreenSafe(AppState.currentFullscreenCard);
+      pauseIframeVideo(AppState.currentFullscreenCard.querySelector('iframe'));
+      AppState.currentFullscreenCard.classList.remove('fullscreen');
+      AppState.currentFullscreenCard = null;
+    }
+  });
+}
+
+    function handleVideoCardClick(event) {
+      if (!AppState.currentFullscreenCard) return;
+      if (AppState.currentFullscreenCard.classList.contains('fullscreen')) {
+        requestFullscreenSafe(AppState.currentFullscreenCard);
+      }
+    }
+
+    function handleFullscreenChange() {
+      if (!document.fullscreenElement && AppState.currentFullscreenCard) {
+        AppState.currentFullscreenCard.classList.remove('fullscreen');
+        AppState.currentFullscreenCard = null;
+      }
+    }
+
+    function handleOrientationChange() {
+      if (!isLandscape() && AppState.currentFullscreenCard) {
+        exitFullscreenSafe(AppState.currentFullscreenCard);
+        pauseIframeVideo(AppState.currentFullscreenCard.querySelector('iframe'));
+        AppState.currentFullscreenCard.classList.remove('fullscreen');
+        AppState.currentFullscreenCard = null;
+      }
+    }
+
+    // ========== UTILITY FUNCTIONS ==========
+    function isLandscape() {
+      return window.innerWidth > window.innerHeight;
+    }
+
+    function requestFullscreenSafe(element) {
+      if (!document.fullscreenElement) {
+        element.requestFullscreen().catch(() => {});
+      }
+    }
+
+    function exitFullscreenSafe(element) {
+      if (document.fullscreenElement === element) {
+        document.exitFullscreen().catch(() => {});
+      }
+    }
+
+    function playIframeVideo(iframe) {
+      iframe.contentWindow.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+    }
+
+    function pauseIframeVideo(iframe) {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+    }
+
+    // ========== DARK MODE ==========
+    function checkDarkModePreference() {
+      if (AppState.darkMode) {
+        document.body.classList.add('dark');
+        DOM.darkToggle.checked = true;
+      }
+    }
+
+    function toggleDarkMode() {
+      AppState.darkMode = DOM.darkToggle.checked;
+      
+      if (AppState.darkMode) {
+        document.body.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+      } else {
+        document.body.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+      }
+    }
+
+    // ========== INIT APP ==========
+    window.onload = initializeApp;
+    var video = document.getElementById("myVideo");
+       video.play();
+
+// ========== Tambahan: Pause Semua Video Saat Ganti Tab ==========
+function pauseAllVideos() {
+  document.querySelectorAll('iframe').forEach(iframe => {
+    if (iframe.contentWindow && iframe.dataset.ready) {
+      iframe.contentWindow.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+    }
+  });
+}
+
+// Modifikasi fungsi tab untuk pause semua video saat berpindah
+function showVideosSection() {
+  pauseAllVideos(); // ← Tambahan
+  DOM.btnVideos.classList.add('active');
+  DOM.btnShorts.classList.remove('active');
+  DOM.videoSection.classList.add('active');
+  DOM.shortsSection.classList.remove('active');
+  DOM.btnVideos.setAttribute('aria-pressed', 'true');
+  DOM.btnShorts.setAttribute('aria-pressed', 'false');
+}
+
+function showShortsSection() {
+  pauseAllVideos(); // ← Tambahan
+  DOM.btnShorts.classList.add('active');
+  DOM.btnVideos.classList.remove('active');
+  DOM.shortsSection.classList.add('active');
+  DOM.videoSection.classList.remove('active');
+  DOM.btnShorts.setAttribute('aria-pressed', 'true');
+  DOM.btnVideos.setAttribute('aria-pressed', 'false');
+}
+
+// Tambahkan observer autoplay shorts setelah selesai render
+const originalRenderShorts = renderShorts;
+renderShorts = function(shorts) {
+  originalRenderShorts(shorts);
+  setupShortsAutoplayObserver(); // ← Tambahan agar Shorts autoplay
+};
+   
+
+function setupStrictShortsAutoplayObserver() {
+  const iframes = Array.from(document.querySelectorAll('#shorts-section iframe'));
+
+  function findTopMostIframe() {
+    let topMost = null;
+    let minTop = Infinity;
+
+    for (const iframe of iframes) {
+      if (!iframe.dataset.ready) continue;
+
+      const rect = iframe.getBoundingClientRect();
+      const top = rect.top;
+
+      if (top >= 0 && top <= 100 && top < minTop) {
+        topMost = iframe;
+        minTop = top;
+      }
+    }
+
+    return topMost;
+  }
+
+  function updatePlayback() {
+    const current = findTopMostIframe();
+
+    for (const iframe of iframes) {
+      const win = iframe.contentWindow;
+      if (!win || !iframe.dataset.ready) continue;
+
+      if (iframe === current) {
+        win.postMessage('{"event":"command","func":"playVideo","args":""}', '*');
+      } else {
+        win.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+      }
+    }
+  }
+
+  // Dengarkan scroll baik di section maupun window
+  document.getElementById('shorts-section').addEventListener('scroll', updatePlayback, { passive: true });
+  window.addEventListener('scroll', updatePlayback, { passive: true });
+  window.addEventListener('resize', updatePlayback);
+
+  updatePlayback(); // jalankan sekali langsung
+}
+function createShortCard(short) {
+  const card = document.createElement('div');
+  card.className = 'short-card';
+
+  const iframe = document.createElement('iframe');
+  iframe.src = `https://www.youtube.com/embed/${short.id}?autoplay=1&controls=0&loop=1&playlist=${short.id}&modestbranding=1&playsinline=1&enablejsapi=1`;
+  iframe.allow = 'autoplay; fullscreen';
+  iframe.allowFullscreen = true;
+  iframe.loading = 'lazy';
+  iframe.title = short.title || "Short video";
+  iframe.dataset.ready = false;
+
+  const info = document.createElement('div');
+  info.className = 'short-info';
+
+  const chImg = document.createElement('img');
+  chImg.className = 'channel-thumb';
+  chImg.src = short.channelThumb || '';
+  chImg.alt = `${short.channelTitle || 'Channel'} thumbnail`;
+
+  const title = document.createElement('div');
+  title.className = 'video-title';
+  title.textContent = short.title;
+
+  info.appendChild(chImg);
+  info.appendChild(title);
+  card.appendChild(iframe);
+  card.appendChild(info);
+
+  iframe.addEventListener('load', () => {
+    iframe.dataset.ready = true;
+  });
+
+  return card;
+}
+
+
+
+function activateMiniPlayer(video) {
+  const mini = document.getElementById('mini-player');
+  const iframe = document.getElementById('mini-iframe');
+  iframe.src = `https://www.youtube.com/embed/${video.id}?autoplay=1&modestbranding=1&playsinline=1&enablejsapi=1`;
+  mini.style.display = 'block';
+}
+
+
+function activateStickyPlayer(video) {
+  const sticky = document.getElementById('sticky-player');
+  const inner = document.getElementById('sticky-inner');
+
+  if (!sticky || !inner) {
+    console.error('Sticky player container not found!');
+    return;
+  }
+
+  inner.innerHTML = `
+    <iframe 
+      src="https://www.youtube.com/embed/${video.id}?autoplay=1&modestbranding=1&playsinline=1&enablejsapi=1"
+      title="${video.title}"
+      allow="autoplay; encrypted-media"
+      allowfullscreen
+      style="position:absolute; top:0; left:0; width:100%; height:100%; border:none;"
+    ></iframe>
+    <button onclick="closeStickyPlayer()" style="position:absolute; top:8px; right:8px; z-index:10000; background:red; color:white; border:none; border-radius:4px; padding:4px 8px;">✕</button>
+  `;
+
+  sticky.style.display = 'block';
+
+  // Pause semua video lain
+  document.querySelectorAll('#video-section iframe').forEach(iframe => {
+    iframe.contentWindow?.postMessage('{"event":"command","func":"pauseVideo","args":""}', '*');
+  });
+
+  // Scroll ke atas agar sticky player terlihat
+  setTimeout(() => {
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, 50); // beri jeda agar iframe sempat render
+}
+
+
+
+function closeStickyPlayer() {
+  const sticky = document.getElementById('sticky-player');
+  const inner = document.getElementById('sticky-inner');
+  sticky.style.display = 'none';
+  inner.innerHTML = ''; // bersihkan konten
+}
+
+
+  </script>
+</body>
+</html>
